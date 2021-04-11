@@ -48,8 +48,9 @@ for epoch in range(10):
     for i, data in enumerate(trainloader):
         # get the inputs; data is a list of [inputs, labels]
         inputs, _ = data
-        inputs = inputs.to(device)
+        #inputs = inputs.to(device)
         inputs1, inputs2 = generate_pairs(inputs)
+        inputs1, inputs2 = inputs1.to(device), inputs2.to(device)
 
         outputs1 = net(inputs1)
         outputs2 = net(inputs2)
@@ -68,7 +69,7 @@ print("Supervised training")
 
 # Removing the projection head
 net.module.fc = net.module.fc[:-2]
-
+net.eval()
 classifier = LinearNet(encoder_features=net.module.fc[-1].out_features)
 classifier = torch.nn.DataParallel(classifier)
 classifier = classifier.to(device)
