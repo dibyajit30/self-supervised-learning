@@ -33,7 +33,10 @@ class EncoderNet(nn.Module):
             ('added_relu1', nn.ReLU(inplace=True)),
             ('fc2', nn.Linear(1000, 1000))
         ]))
-        self.model.fc = classifier
+        fc_layers = []
+        fc_layers.append(classifier[:])
+        fc_layers = nn.Sequential(*fc_layers)
+        self.model.fc = fc_layers
         
     def forward(self, x):
         x = self.model(x)
