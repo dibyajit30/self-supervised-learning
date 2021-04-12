@@ -8,7 +8,7 @@ from torchvision import datasets, transforms, models
 from custom_loss import nt_xent
 
 from dataloader import CustomDataset
-from submission import get_model, LinearNet
+from submission import get_model, get_projection_head, get_classifier_model, LinearNet
 from transform import generate_pairs
 
 parser = argparse.ArgumentParser()
@@ -23,7 +23,7 @@ trainset = CustomDataset(root='/dataset', split="train", transform=train_transfo
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=256, shuffle=True, num_workers=2)
 
 unlabeledset = CustomDataset(root='/dataset', split="unlabeled", transform=train_transform)
-unlabeledloader = torch.utils.data.DataLoader(trainset, batch_size=1024, shuffle=True, num_workers=2)
+unlabeledloader = torch.utils.data.DataLoader(trainset, batch_size=8192, shuffle=True, num_workers=2)
 
 if torch.cuda.is_available():
   device = torch.device("cuda")
@@ -32,9 +32,13 @@ else:
   device = torch.device("cpu")
   print('GPU not found, training will be slow...')
 
-net = get_model()
+#net = get_classifier_model()
+combined_net = get_model()
+net = combined_net.encoder
 net = torch.nn.DataParallel(net)
 net = net.to(device)
+
+net.module.model.fc = get_projection_head(net.module.model)
 
 optimizer = torch.optim.Adam(net.parameters(), lr=0.1)
 
@@ -68,9 +72,10 @@ for epoch in range(10):
 print("Supervised training")
 
 # Removing the projection head
-net.module.fc = net.module.fc[:-2]
+net.module.model.fc = net.module.model.fc[:-2]
 net.eval()
-classifier = LinearNet(encoder_features=net.module.fc[-1].out_features)
+#classifier = LinearNet(encoder_features=net.module.fc[-1].out_features)
+classifier = combined_net.classifier
 classifier = torch.nn.DataParallel(classifier)
 classifier = classifier.to(device)
 criterion = nn.CrossEntropyLoss()
@@ -102,8 +107,10 @@ for epoch in range(10):
 print('Finished Training')
 
 os.makedirs(args.checkpoint_dir, exist_ok=True)
-torch.save(net.module.state_dict(), os.path.join(args.checkpoint_dir, "simclr_encoder.pth"))
-torch.save(classifier.module.state_dict(), os.path.join(args.checkpoint_dir, "simclr_classifier.pth"))
+torch.save(combined_net.state_dict(), os.path.join(args.checkpoint_dir, "simclr.pth"))
+#torch.save(net.module.state_dict(), os.path.join(args.checkpoint_dir, "simclr_encoder.pth"))
+#torch.save(classifier.module.state_dict(), os.path.join(args.checkpoint_dir, "simclr_classifier.pth"))
 
-print(f"Saved encoder checkpoint to {os.path.join(args.checkpoint_dir, 'simclr_encoder.pth')}")
-print(f"Saved classifier checkpoint to {os.path.join(args.checkpoint_dir, 'simclr_classifier.pth')}")
+print(f"Saved encoder checkpoint to {os.path.join(args.checkpoint_dir, 'simclr.pth')}")
+#print(f"Saved encoder checkpoint to {os.path.join(args.checkpoint_dir, 'simclr_encoder.pth')}")
+#print(f"Saved classifier checkpoint to {os.path.join(args.checkpoint_dir, 'simclr_classifier.pth')}")
