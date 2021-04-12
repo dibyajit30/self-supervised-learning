@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F 
-from torchvision.models import resnet50
+from torchvision.models import resnet50,resnet18
 from collections import OrderedDict
 import torchvision.transforms as T
 
@@ -11,10 +11,10 @@ def D(p, z):
 class SimSiam(nn.Module):
     def __init__(self):
         super().__init__()
-        self.backbone = resnet50()
+        self.backbone = resnet18()
         self.backbone.fc=torch.nn.Identity()
         self.projector = nn.Sequential(
-          nn.Linear(2048,2048),
+          nn.Linear(512,2048),
           nn.BatchNorm1d(2048),
           nn.ReLU(inplace=True),
           nn.Linear(2048,2048),

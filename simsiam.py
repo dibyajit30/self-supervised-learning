@@ -51,7 +51,6 @@ for epoch in range(1):
         loss.backward()
         optimizer.zero_grad()
         optimizer.step()
-        lr_scheduler.step()
         running_loss += loss.item()
         batch+=1
         if i % 10 == 9:    # print every 10 mini-batches
