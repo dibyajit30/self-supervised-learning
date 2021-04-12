@@ -44,4 +44,4 @@ class SimSiam(nn.Module):
     
 def get_model():
     model=SimSiam()
-    
+    return model
