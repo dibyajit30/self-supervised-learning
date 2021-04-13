@@ -10,7 +10,7 @@ from collections import OrderedDict
 import torchvision.transforms as T
 from torchvision import datasets
 from dataloader import CustomDataset
-from submission_simsiam import get_model, D
+from submission_simsiam import get_encoder, D
 from transform import generate_pairs_simsiam
 import time
 train_transform = transforms.Compose([
@@ -29,7 +29,7 @@ if torch.cuda.is_available():
 else:
   device = torch.device("cpu")
 
-model=get_model()
+model=get_encoder()
 model=torch.nn.DataParallel(model)
 model=model.to(device)
 

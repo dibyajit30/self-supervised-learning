@@ -41,7 +41,34 @@ class SimSiam(nn.Module):
         p1, p2 = h(z1), h(z2)
         L = D(p1, z2) / 2 + D(p2, z1) / 2
         return L
+
+class LinearNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.classifier=nn.Sequential(
+            nn.Linear(512,1024),
+            nn.BatchNorm1d(1024),
+            nn.Linear(1024,800)
+        )
+    def forward(self,x):
+        x = self.classifier(x)
+        return x
+
+class FinalModel(nn.Module):
+    def __init__(self):
+        self.encoder = get_encoder()
+        self.classifier = get_classifier()
     
-def get_model():
+    def forward(self,x):
+        x = self.encoder.module.backbone(x)
+        x = self.classifier(x)
+        return x
+        
+    
+def get_encoder():
     model=SimSiam()
+    return model
+
+def get_classifier():
+    model=LinearNet()
     return model
