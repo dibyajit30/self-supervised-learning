@@ -33,13 +33,13 @@ model=get_encoder()
 model=torch.nn.DataParallel(model)
 model=model.to(device)
 
-lr = 0.05 * 512 / 256
+lr = 0.05 * 256 / 256
 optimizer = torch.optim.SGD(model.parameters(),lr=lr,momentum=0.9,weight_decay=5e-4)
 
 print("Started contrastive training")
 batch=1
+cur = time.time()
 for epoch in range(1):
-    cur = time.time()
     model.train()
     running_loss = 0.0
     for i, data in enumerate(unlabeledloader):
@@ -47,15 +47,14 @@ for epoch in range(1):
         inputs1,inputs2 = generate_pairs_simsiam(inputs)
         inputs1, inputs2 = inputs1.to(device), inputs2.to(device)
         loss = model(inputs1,inputs2)
+        optimizer.zero_grad()
         loss.backward()
-        if (batch*256)%512==0:
-            optimizer.zero_grad()
-            optimizer.step()
+        optimizer.step()
         running_loss += loss.item()
-        if (batch/2) % 10 == 9:    # print every 10 mini-batches
-            print('[%d, %5d] loss: %.6f' % (epoch + 1, batch/2, running_loss / 20))
+        if (i) % 10 == 9:    # print every 10 mini-batches
+            print('[%d, %5d] loss: %.6f' % (epoch + 1, i, running_loss / 10))
             running_loss = 0.0
         batch+=1
-    print("Training time {}".format(time.time()-cur))
+print("Training time {}".format(time.time()-cur))
 os.makedirs(args.checkpoint_dir, exist_ok=True)
 torch.save(model.module.state_dict(), os.path.join(args.checkpoint_dir, "simsiam_encoder.pth"))

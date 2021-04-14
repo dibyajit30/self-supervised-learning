@@ -31,9 +31,9 @@ else:
   device = torch.device("cpu")
 
 model=get_encoder()
+model.load_state_dict(checkpoint)
 model=torch.nn.DataParallel(model)
 model=model.to(device)
-model.load_state_dict(checkpoint)
 
 classifier = get_classifier()
 classifier=torch.nn.DataParallel(classifier)
@@ -53,12 +53,12 @@ for epoch in range(10):
                 feature = model(images.to(device))
             preds = classifier(feature)
             loss = F.cross_entropy(preds, labels.to(device))
+            optimizer.zero_grad()
             loss.backward()
             running_loss += loss.item()
-            classifier.zero_grad()
             optimizer.step()
         if (idx) % 10 == 9:    # print every 10 mini-batches
-            print('[%d, %5d] loss: %.6f' % (epoch + 1, idx+1, running_loss / 20))
+            print('[%d, %5d] loss: %.6f' % (epoch + 1, idx+1, running_loss / 10))
             running_loss = 0.0            
         batch+=1
 os.makedirs(args.checkpoint_dir, exist_ok=True)
