@@ -47,8 +47,12 @@ class LinearNet(nn.Module):
         super().__init__()
         self.classifier=nn.Sequential(
             nn.Linear(512,1024),
-            nn.BatchNorm1d(1024),
-            nn.Linear(1024,800)
+            nn.Dropout(0.2),
+            nn.LeakyReLU(),
+            nn.Linear(1024,1024),
+            nn.Dropout(0.2),
+            nn.LeakyReLU(),
+            nn.Linear(1024,800),
         )
     def forward(self,x):
         x = self.classifier(x)
