@@ -36,9 +36,10 @@ else:
 combined_net = get_model()
 net = combined_net.encoder
 net = torch.nn.DataParallel(net)
-net = net.to(device)
+#net = net.to(device)
 
 net.module.model.fc = get_projection_head(net.module.model)
+net = net.to(device)
 
 optimizer = torch.optim.Adam(net.parameters(), lr=0.1)
 
@@ -52,6 +53,7 @@ for epoch in range(10):
     for i, data in enumerate(unlabeledloader):
         # get the inputs; data is a list of [inputs, labels]
         inputs, _ = data
+        print("batch read")
         #inputs = inputs.to(device)
         inputs1, inputs2 = generate_pairs(inputs)
         inputs1, inputs2 = inputs1.to(device), inputs2.to(device)
@@ -66,8 +68,8 @@ for epoch in range(10):
 
         # print statistics
         running_loss += loss.item()
-        if i % 100 == 99:    # print every 100 mini-batches
-            print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 100))
+        if i % 50 == 49:    # print every 100 mini-batches
+            print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 50))
 
 print("Supervised training")
 
