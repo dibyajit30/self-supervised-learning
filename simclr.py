@@ -8,7 +8,7 @@ from torchvision import datasets, transforms, models
 from custom_loss import nt_xent
 
 from dataloader import CustomDataset
-from submission import get_model, get_projection_head, get_classifier_model, LinearNet
+from submission import get_model, get_projection_head, LinearNet
 from transform import generate_pairs
 
 parser = argparse.ArgumentParser()
@@ -23,7 +23,7 @@ trainset = CustomDataset(root='/dataset', split="train", transform=train_transfo
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=256, shuffle=True, num_workers=2)
 
 unlabeledset = CustomDataset(root='/dataset', split="unlabeled", transform=train_transform)
-unlabeledloader = torch.utils.data.DataLoader(trainset, batch_size=8192, shuffle=True, num_workers=2)
+unlabeledloader = torch.utils.data.DataLoader(unlabeledset, batch_size=256, shuffle=True, num_workers=2)
 
 if torch.cuda.is_available():
   device = torch.device("cuda")
@@ -49,7 +49,7 @@ net.train()
 
 for epoch in range(10):
     running_loss = 0.0
-    for i, data in enumerate(trainloader):
+    for i, data in enumerate(unlabeledloader):
         # get the inputs; data is a list of [inputs, labels]
         inputs, _ = data
         #inputs = inputs.to(device)
@@ -108,9 +108,5 @@ print('Finished Training')
 
 os.makedirs(args.checkpoint_dir, exist_ok=True)
 torch.save(combined_net.state_dict(), os.path.join(args.checkpoint_dir, "simclr.pth"))
-#torch.save(net.module.state_dict(), os.path.join(args.checkpoint_dir, "simclr_encoder.pth"))
-#torch.save(classifier.module.state_dict(), os.path.join(args.checkpoint_dir, "simclr_classifier.pth"))
 
 print(f"Saved encoder checkpoint to {os.path.join(args.checkpoint_dir, 'simclr.pth')}")
-#print(f"Saved encoder checkpoint to {os.path.join(args.checkpoint_dir, 'simclr_encoder.pth')}")
-#print(f"Saved classifier checkpoint to {os.path.join(args.checkpoint_dir, 'simclr_classifier.pth')}")
