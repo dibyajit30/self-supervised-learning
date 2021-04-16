@@ -23,7 +23,7 @@ trainset = CustomDataset(root='/dataset', split="train", transform=train_transfo
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=256, shuffle=True, num_workers=2)
 
 unlabeledset = CustomDataset(root='/dataset', split="unlabeled", transform=train_transform)
-unlabeledloader = torch.utils.data.DataLoader(unlabeledset, batch_size=256, shuffle=True, num_workers=2)
+unlabeledloader = torch.utils.data.DataLoader(unlabeledset, batch_size=512, shuffle=True, num_workers=2)
 
 if torch.cuda.is_available():
   device = torch.device("cuda")
@@ -53,7 +53,6 @@ for epoch in range(10):
     for i, data in enumerate(unlabeledloader):
         # get the inputs; data is a list of [inputs, labels]
         inputs, _ = data
-        print("batch read")
         #inputs = inputs.to(device)
         inputs1, inputs2 = generate_pairs(inputs)
         inputs1, inputs2 = inputs1.to(device), inputs2.to(device)
@@ -70,11 +69,15 @@ for epoch in range(10):
         running_loss += loss.item()
         if i % 50 == 49:    # print every 100 mini-batches
             print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 50))
+    # Save checkpoint
+    torch.save(net.state_dict(), os.path.join(args.checkpoint_dir, "simclr_encoder.pth"))
 
 print("Supervised training")
 
 # Removing the projection head
 net.module.model.fc = net.module.model.fc[:-2]
+# Save model for backup
+torch.save(combined_net.state_dict(), os.path.join(args.checkpoint_dir, "simclr.pth"))
 net.eval()
 #classifier = LinearNet(encoder_features=net.module.fc[-1].out_features)
 classifier = combined_net.classifier
