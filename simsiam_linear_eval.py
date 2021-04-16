@@ -11,16 +11,16 @@ import torchvision.transforms as T
 from torchvision import datasets
 from dataloader import CustomDataset
 from submission_simsiam import get_encoder, D, get_classifier
-from transform import generate_pairs_simsiam
+from transform import generate_pairs_simsiam, Cutout
 import time
-
 train_transform = transforms.Compose([
             T.RandomResizedCrop((96,96), scale=(0.2, 1.0)),
             T.RandomHorizontalFlip(),
             T.RandomApply([T.ColorJitter(0.4,0.4,0.4,0.1)], p=0.8),
             T.RandomGrayscale(p=0.2),
             T.RandomApply([T.GaussianBlur(kernel_size=96//20*2+1, sigma=(0.1, 2.0))], p=0.5),
-            T.ToTensor()
+            T.ToTensor(),
+            Cutout(1,4)
 ])
 
 val_transform = transforms.Compose([
@@ -41,18 +41,18 @@ else:
 
 model=get_encoder()
 model.load_state_dict(checkpoint)
-model=torch.nn.DataParallel(model)
+#model=torch.nn.DataParallel(model)
 model=model.to(device)
 
 classifier = get_classifier()
-classifier=torch.nn.DataParallel(classifier)
+#classifier=torch.nn.DataParallel(classifier)
 classifier=classifier.to(device)
 
 
 batch=1
 print("Started Supervised training")
-model=model.module.backbone
-model.fc=classifier.module.classifier
+model=model.backbone
+model.fc=classifier.classifier
 model=model.to(device)
 optimizer = torch.optim.SGD(model.parameters(), lr=0.001,nesterov="True",momentum=0.9)
 for epoch in range(100):
@@ -74,7 +74,7 @@ for epoch in range(100):
                 print('[%d, %5d] loss: %.6f' % (epoch + 1, idx+1, running_loss / 10))
                 running_loss = 0.0            
 #os.makedirs(args.checkpoint_dir, exist_ok=True)
-#torch.save(classifier.module.state_dict(), os.path.join(args.checkpoint_dir, "simsiam_classifier.pth"))            
+torch.save(model.state_dict(), "simsiam_fine_tuned.pth")            
 
 valset1 = CustomDataset(root='/home/jupyter/dataset', split="train", transform=val_transform)
 valloader1 = torch.utils.data.DataLoader(valset1, batch_size=256, shuffle=False, num_workers=1)
@@ -104,6 +104,9 @@ print("Started validating")
 correct = 0
 total = 0
 model.eval()
+classes={}
+for i in range(800):
+    classes[i]=0
 with torch.no_grad():
     for data in valloader:
         images, labels = data
@@ -116,4 +119,10 @@ with torch.no_grad():
         _, predicted = torch.max(outputs.data, 1)
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
+        for i in range(len(predicted)):
+            if predicted[i].item()!=labels[i].item():
+                classes[labels[i].item()]+=1
 print(correct/total)
+print(classes)
+import pickle
+pickle.dumps(classes,open('labels.pickle','wb'))
