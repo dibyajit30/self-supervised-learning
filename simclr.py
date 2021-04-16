@@ -16,6 +16,11 @@ parser.add_argument('--checkpoint-dir', type=str)
 args = parser.parse_args()
 
 train_transform = transforms.Compose([
+    transforms.RandomResizedCrop((96,96), scale=(0.2, 1.0)),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomApply([transforms.ColorJitter(0.4,0.4,0.4,0.1)], p=0.8),
+    transforms.RandomGrayscale(p=0.2),
+    transforms.RandomApply([transforms.GaussianBlur(kernel_size=96//20*2+1, sigma=(0.1, 2.0))], p=0.5),
     transforms.ToTensor(),
 ])
 
