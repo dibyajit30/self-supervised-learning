@@ -11,10 +11,10 @@ def D(p, z):
 class SimSiam(nn.Module):
     def __init__(self):
         super().__init__()
-        self.backbone = resnet18()
+        self.backbone = resnet50()
         self.backbone.fc=torch.nn.Identity()
         self.projector = nn.Sequential(
-          nn.Linear(512,2048),
+          nn.Linear(2048,2048),
           nn.BatchNorm1d(2048),
           nn.ReLU(inplace=True),
           nn.Linear(2048,2048),
@@ -46,13 +46,17 @@ class LinearNet(nn.Module):
     def __init__(self):
         super().__init__()
         self.classifier=nn.Sequential(
-            nn.Linear(512,1024),
-            nn.Dropout(0.2),
+            nn.Linear(2048,4096),
+            nn.BatchNorm1d(4096),
             nn.LeakyReLU(),
-            nn.Linear(1024,1024),
-            nn.Dropout(0.2),
+            nn.Linear(4096,2048),
+            nn.BatchNorm1d(2048),
+            nn.LeakyReLU(),
+            nn.Linear(2048,1024),
+            nn.BatchNorm1d(1024),
             nn.LeakyReLU(),
             nn.Linear(1024,800),
+            nn.LogSoftmax(dim=1)
         )
     def forward(self,x):
         x = self.classifier(x)
