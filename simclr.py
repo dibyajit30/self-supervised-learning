@@ -15,6 +15,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--checkpoint-dir', type=str)
 args = parser.parse_args()
 
+continue_training = True
+
 train_transform = transforms.Compose([
     transforms.RandomResizedCrop((96,96), scale=(0.2, 1.0)),
     transforms.RandomHorizontalFlip(),
@@ -28,7 +30,7 @@ trainset = CustomDataset(root='/dataset', split="train", transform=train_transfo
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=256, shuffle=True, num_workers=2)
 
 unlabeledset = CustomDataset(root='/dataset', split="unlabeled", transform=train_transform)
-unlabeledloader = torch.utils.data.DataLoader(unlabeledset, batch_size=512, shuffle=True, num_workers=2)
+unlabeledloader = torch.utils.data.DataLoader(unlabeledset, batch_size=256, shuffle=True, num_workers=2)
 
 if torch.cuda.is_available():
   device = torch.device("cuda")
@@ -44,6 +46,9 @@ net = torch.nn.DataParallel(net)
 #net = net.to(device)
 
 net.module.model.fc = get_projection_head(net.module.model)
+if continue_training:
+    checkpoint = torch.load(os.path.join(args.checkpoint_dir, "simclr_encoder.pth"))
+    net.load_state_dict(checkpoint)
 net = net.to(device)
 
 optimizer = torch.optim.Adam(net.parameters(), lr=0.1)
@@ -53,7 +58,7 @@ print('Start Training')
 print("Contrastive training")
 net.train()
 
-for epoch in range(10):
+for epoch in range(2):
     running_loss = 0.0
     for i, data in enumerate(unlabeledloader):
         # get the inputs; data is a list of [inputs, labels]
