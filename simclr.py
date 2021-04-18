@@ -58,7 +58,7 @@ print('Start Training')
 print("Contrastive training")
 net.train()
 
-for epoch in range(2):
+for epoch in range(0):
     running_loss = 0.0
     for i, data in enumerate(unlabeledloader):
         # get the inputs; data is a list of [inputs, labels]
@@ -94,7 +94,7 @@ classifier = combined_net.classifier
 classifier = torch.nn.DataParallel(classifier)
 classifier = classifier.to(device)
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(net.parameters(), lr=0.1)
+optimizer = torch.optim.Adam(classifier.parameters(), lr=0.1)
 classifier.train()
 
 
