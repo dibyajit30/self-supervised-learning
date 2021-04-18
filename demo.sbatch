@@ -3,7 +3,7 @@
 #SBATCH --gres=gpu:1
 #SBATCH --partition=n1s8-t4-1
 #SBATCH --account=dl16
-#SBATCH --time=1:00:00
+#SBATCH --time=60:00:00
 #SBATCH --output=demo_%j.out
 #SBATCH --error=demo_%j.err
 #SBATCH --exclusive
@@ -23,7 +23,7 @@ cd $HOME/test
 
 singularity exec --nv \
 --bind /scratch \
---overlay /scratch/DL21SP/conda.sqsh:ro \
+--overlay /scratch/DL21SP/conda_fixed.sqsh:ro \
 --overlay /tmp/student_dataset.sqsh:ro \
 /share/apps/images/cuda11.1-cudnn8-devel-ubuntu18.04.sif \
 /bin/bash -c "

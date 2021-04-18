@@ -77,6 +77,9 @@ for epoch in range(10):
             print('[%d, %5d] loss: %.6f' % (epoch + 1, i, running_loss / 10))
             running_loss = 0.0
         batch+=1
+    filename="simsiam_encoder_"+str(epoch)+".pth"
+    torch.save(model.module.state_dict(), os.path.join(args.checkpoint_dir, filename))
+
 print("Training time {}".format(time.time()-cur))
 os.makedirs(args.checkpoint_dir, exist_ok=True)
 torch.save(model.module.state_dict(), os.path.join(args.checkpoint_dir, "simsiam_encoder_224.pth"))
