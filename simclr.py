@@ -88,13 +88,13 @@ print("Supervised training")
 net.module.model.fc = net.module.model.fc[:-2]
 # Save model for backup
 torch.save(combined_net.state_dict(), os.path.join(args.checkpoint_dir, "simclr.pth"))
-net.eval()
+#net.eval()
 #classifier = LinearNet(encoder_features=net.module.fc[-1].out_features)
 classifier = combined_net.classifier
 classifier = torch.nn.DataParallel(classifier)
 classifier = classifier.to(device)
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(classifier.parameters(), lr=0.1)
+optimizer = torch.optim.Adam(combined_net.parameters(), lr=0.1)
 classifier.train()
 
 
