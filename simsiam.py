@@ -19,6 +19,7 @@ train_transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--checkpoint-dir', type=str)
 args = parser.parse_args()
@@ -30,8 +31,11 @@ if torch.cuda.is_available():
   device = torch.device("cuda")
 else:
   device = torch.device("cpu")
-
+encoder_checkpoint_path = os.path.join(args.checkpoint_path, "simsiam_encoder_1.pth")
+#encoder_checkpoint_path = "/home/jupyter/simsiam_encoder_1.pth"
+checkpoint=torch.load(encoder_checkpoint_path)
 model=get_encoder()
+model.load_state_dict(checkpoint)
 model=torch.nn.DataParallel(model)
 model=model.to(device)
 
@@ -66,6 +70,7 @@ for epoch in range(10):
         inputs1,inputs2 = generate_pairs_simsiam(inputs)
         inputs1, inputs2 = inputs1.to(device), inputs2.to(device)
         loss = model(inputs1,inputs2)
+        loss=loss/4
         loss=loss.mean()
         loss.backward()
         if batch%4==0:

@@ -31,7 +31,7 @@ def get_aug():
             T.RandomHorizontalFlip(),
             T.RandomApply([T.ColorJitter(0.4,0.4,0.4,0.1)], p=0.8),
             T.RandomGrayscale(p=0.2),
-            T.RandomApply([T.GaussianBlur(kernel_size=96//20*2+1, sigma=(0.1, 2.0))], p=0.5),
+            T.RandomApply([T.GaussianBlur(kernel_size=224//20*2+1, sigma=(0.1, 2.0))], p=0.5),
             T.ToTensor()
         ])
     return transform

@@ -30,7 +30,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--checkpoint-dir', type=str)
 args = parser.parse_args()
 #encoder_checkpoint_path = os.path.join(args.checkpoint_path, "simsiam_encoder.pth")
-encoder_checkpoint_path = "/home/jupyter/simsiam_encoder2.pth"
+encoder_checkpoint_path = "/home/jupyter/simsiam_encoder_1.pth"
 trainset = CustomDataset(root='/home/jupyter/dataset', split="train", transform=train_transform)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=256, shuffle=True, num_workers=1)
 checkpoint=torch.load(encoder_checkpoint_path)
