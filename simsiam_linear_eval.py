@@ -45,7 +45,7 @@ else:
 model=get_model()
 model.load_state_dict(checkpoint)
 #model=torch.nn.DataParallel(model)
-model=model.encoder
+#model=model.encoder
 model=model.to(device)
 
 classifier = get_classifier()
@@ -101,9 +101,10 @@ def val(model):
 
 batch=1
 print("Started Supervised training")
-model=model.backbone
-model.fc=classifier.classifier
-model=model.to(device)
+model.classifier=classifier
+#model=model.backbone
+#model.fc=classifier.classifier
+#model=model.to(device)
 optimizer = torch.optim.SGD(model.parameters(), lr=0.001,nesterov="True",momentum=0.9)
 #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[25,50,75], gamma=10)
 for epoch in range(100):
