@@ -21,6 +21,7 @@ evalset = CustomDataset(root='/dataset', split="val", transform=eval_transform)
 evalloader = torch.utils.data.DataLoader(evalset, batch_size=256, shuffle=False, num_workers=2)
 
 net = get_model()
+#checkpoint = torch.load('simclr.pth')
 checkpoint = torch.load(args.checkpoint_path)
 net.load_state_dict(checkpoint)
 net = net.cuda()

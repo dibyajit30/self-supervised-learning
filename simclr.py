@@ -10,12 +10,13 @@ from custom_loss import nt_xent
 from dataloader import CustomDataset
 from submission import get_model, get_projection_head, LinearNet
 from transform import generate_pairs
+from custom_optimizer import LARS_simclr
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--checkpoint-dir', type=str)
 args = parser.parse_args()
 
-continue_training = True
+continue_training = False
 
 train_transform = transforms.Compose([
     transforms.RandomResizedCrop((96,96), scale=(0.2, 1.0)),
@@ -51,14 +52,15 @@ if continue_training:
     net.load_state_dict(checkpoint)
 net = net.to(device)
 
-optimizer = torch.optim.Adam(net.parameters(), lr=0.1)
+#optimizer = torch.optim.SGD(net.parameters(), lr=0.3)
+optimizer = LARS_simclr(net.named_modules(), lr=0.3)
 
 print('Start Training')
 
 print("Contrastive training")
 net.train()
 
-for epoch in range(0):
+for epoch in range(10):
     running_loss = 0.0
     for i, data in enumerate(unlabeledloader):
         # get the inputs; data is a list of [inputs, labels]
@@ -78,19 +80,19 @@ for epoch in range(0):
         # print statistics
         running_loss += loss.item()
         if i % 50 == 49:    # print every 100 mini-batches
-            print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 50))
+            print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / (i+1)))
     # Save checkpoint
     torch.save(net.state_dict(), os.path.join(args.checkpoint_dir, "simclr_encoder.pth"))
 
 print("Supervised training")
 
 # Removing the projection head
-net.module.model.fc = net.module.model.fc[:-2]
+net.module.model.fc = net.module.model.fc[0]
 # Save model for backup
 torch.save(combined_net.state_dict(), os.path.join(args.checkpoint_dir, "simclr.pth"))
 #net.eval()
 #classifier = LinearNet(encoder_features=net.module.fc[-1].out_features)
-classifier = combined_net.classifier
+'''classifier = combined_net.classifier
 classifier = torch.nn.DataParallel(classifier)
 classifier = classifier.to(device)
 criterion = nn.CrossEntropyLoss()
@@ -117,11 +119,11 @@ for epoch in range(10):
         running_loss += loss.item()
         if i % 10 == 9:    # print every 10 mini-batches
             print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 10))
-            running_loss = 0.0
+            running_loss = 0.0'''
 
 print('Finished Training')
 
-os.makedirs(args.checkpoint_dir, exist_ok=True)
-torch.save(combined_net.state_dict(), os.path.join(args.checkpoint_dir, "simclr.pth"))
+'''os.makedirs(args.checkpoint_dir, exist_ok=True)
+torch.save(combined_net.state_dict(), os.path.join(args.checkpoint_dir, "simclr.pth"))'''
 
 print(f"Saved encoder checkpoint to {os.path.join(args.checkpoint_dir, 'simclr.pth')}")

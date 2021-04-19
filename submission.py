@@ -13,15 +13,15 @@ email_address = "sg6148@nyu.edu"
 class EncoderNet(nn.Module):
     def __init__(self, encoder_features=100, num_classes=800):
         super(EncoderNet, self).__init__()
-        self.model = models.resnet50(num_classes=800)
+        self.model = models.resnet50()
     
-        classifier = nn.Sequential(OrderedDict([
+        '''classifier = nn.Sequential(OrderedDict([
             ('fc1', nn.Linear(self.model.fc.in_features, 1000)),
             ('added_relu1', nn.ReLU(inplace=True)),
             ('fc2', nn.Linear(1000, 1000))
         ]))
         
-        self.model.fc = classifier
+        self.model.fc = classifier'''
         
     def forward(self, x):
         x = self.model(x)
@@ -56,13 +56,13 @@ def get_model():
     model = CombinedNet()
     return model
         
-def get_projection_head(model):
+def get_projection_head(model, num_classes=800):
     classifier = nn.Sequential(OrderedDict([
-            ('fc1', nn.Linear(model.fc[0].in_features, 1000)),
-            ('added_relu1', nn.ReLU(inplace=True)),
-            ('fc2', nn.Linear(1000, 1000)),
+            ('fc1', nn.Linear(model.fc.in_features, model.fc.out_features)),
+            #('added_relu1', nn.ReLU(inplace=True)),
+            ('fc2', nn.Linear(model.fc.out_features, model.fc.out_features)),
             ('added_relu2', nn.ReLU(inplace=True)),
-            ('fc3', nn.Linear(1000, 1000)),
+            ('fc3', nn.Linear(model.fc.out_features, num_classes)),
         ]))
     return classifier
 

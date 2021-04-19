@@ -1,6 +1,6 @@
 import torch
 
-def nt_xent(a, b, tau=0.1):
+def nt_xent(a, b, tau=0.5):
     a_norm = torch.norm(a,dim=1).reshape(-1,1)
     a_cap = torch.div(a,a_norm)
     b_norm = torch.norm(b,dim=1).reshape(-1,1)

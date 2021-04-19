@@ -129,7 +129,7 @@ for epoch in range(100):
         val_acc=val(model)
         print("Training acc {} Val Acc {}".format(train_acc,val_acc))
 #os.makedirs(args.checkpoint_dir, exist_ok=True)
-torch.save(model.state_dict(), os.path.join(args.checkpoint_dir, "simsiam_fine_tuned.pth"))            
+torch.save(model.state_dict(), os.path.join(args.checkpoint_dir, "simclr.pth"))            
 
 
 
