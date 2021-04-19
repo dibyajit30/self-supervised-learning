@@ -32,5 +32,6 @@ conda activate dev
 ##python demo.py --checkpoint-dir $SCRATCH/checkpoints/demo
 python simclr.py --checkpoint-dir $SCRATCH/checkpoints/simclr
 ##python eval.py --checkpoint-path $SCRATCH/checkpoints/demo/net_demo.pth
-python eval.py --checkpoint-path $SCRATCH/checkpoints/simclr/simclr.pth
+##python eval.py --checkpoint-path $SCRATCH/checkpoints/simclr/simclr.pth
+python simsiam_linear_eval.py --checkpoint-path $SCRATCH/checkpoints/simclr/simclr.pth
 "
