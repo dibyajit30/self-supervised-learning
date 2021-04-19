@@ -23,15 +23,15 @@ cd $HOME/test
 
 singularity exec --nv \
 --bind /scratch \
---overlay /scratch/DL21SP/conda.sqsh:ro \
+--overlay /scratch/DL21SP/conda_fixed.sqsh:ro \
 --overlay /tmp/student_dataset.sqsh:ro \
 /share/apps/images/cuda11.1-cudnn8-devel-ubuntu18.04.sif \
 /bin/bash -c "
 source /ext3/env.sh
 conda activate dev
 ##python demo.py --checkpoint-dir $SCRATCH/checkpoints/demo
-python simclr.py --checkpoint-dir $SCRATCH/checkpoints/simclr
+##python simclr.py --checkpoint-dir $SCRATCH/checkpoints/simclr
 ##python eval.py --checkpoint-path $SCRATCH/checkpoints/demo/net_demo.pth
 ##python eval.py --checkpoint-path $SCRATCH/checkpoints/simclr/simclr.pth
-python simsiam_linear_eval.py --checkpoint-path $SCRATCH/checkpoints/simclr/simclr.pth
+python simsiam_linear_eval.py --checkpoint-path $SCRATCH/checkpoints/simclr
 "
