@@ -48,16 +48,13 @@ class LinearNet(nn.Module):
         self.classifier=nn.Sequential(
             nn.Linear(2048,4096),
             nn.BatchNorm1d(4096),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Linear(4096,2048),
             nn.BatchNorm1d(2048),
-            nn.ReLU(),
-            nn.Linear(2048,2048),
-            nn.BatchNorm1d(2048),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Linear(2048,1024),
             nn.BatchNorm1d(1024),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Linear(1024,800),
             nn.LogSoftmax(dim=1)
         )
