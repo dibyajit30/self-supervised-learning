@@ -18,12 +18,13 @@ train_transform = transforms.Compose([
             #T.Resize((128,128)),
             #T.CenterCrop((96,96)),
             T.RandomHorizontalFlip(),
-            #T.RandomVerticalFlip(p=0.2),
+            T.RandomVerticalFlip(p=0.2),
             T.RandomApply([T.RandomRotation((-45,45))],p=0.1),
             T.RandomApply([T.ColorJitter(0.4,0.4,0.4,0.1)], p=0.8),
             T.RandomGrayscale(p=0.2),
             T.RandomApply([T.GaussianBlur(kernel_size=96//20*2+1, sigma=(0.1, 2.0))], p=0.5),
-            T.ToTensor()
+            T.ToTensor(),
+            #T.RandomApply([Cutout(1,4)],p=0.5)
 ])
 
 val_transform = transforms.Compose([
@@ -34,7 +35,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--checkpoint-dir', type=str)
 args = parser.parse_args()
 #encoder_checkpoint_path = os.path.join(args.checkpoint_path, "simsiam_encoder.pth")
-encoder_checkpoint_path = "/home/jupyter/self-supervised-learning/checkpoint96/simsiam_encoder_19.pth"
+encoder_checkpoint_path = "/home/jupyter/self-supervised-learning/simsiam_encoder_19.pth"
 trainset = CustomDataset(root='/home/jupyter/dataset', split="train", transform=train_transform)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=256, shuffle=True, num_workers=1)
 checkpoint=torch.load(encoder_checkpoint_path)
