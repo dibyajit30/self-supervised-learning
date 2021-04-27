@@ -31,6 +31,7 @@ if torch.cuda.is_available():
   device = torch.device("cuda")
 else:
   device = torch.device("cpu")
+print(device)
 #encoder_checkpoint_path = os.path.join(args.checkpoint_path, "simsiam_encoder_1.pth")
 #encoder_checkpoint_path = "/home/jupyter/simsiam_encoder_1.pth"
 #checkpoint=torch.load(encoder_checkpoint_path)
@@ -54,13 +55,13 @@ optimizer = torch.optim.SGD(parameters,lr=lr,momentum=0.9,weight_decay=5e-4)
 lr_scheduler = LR_Scheduler(
         optimizer,
         1, 0, 
-        20, 0.05*256/256, 0, 
+        100, 0.05*256/256, 0, 
         len(unlabeledloader),
         constant_predictor_lr=True 
 )
 print("Started contrastive training")
 cur = time.time()
-for epoch in range(20):
+for epoch in range(100):
     model.train()
     running_loss = 0.0
 #     optimizer.zero_grad()

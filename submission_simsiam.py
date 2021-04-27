@@ -69,10 +69,10 @@ class FinalModel(nn.Module):
     def __init__(self):
         self.encoder = get_encoder()
         self.classifier = get_classifier()
+        self.encoder.backbone.fc=self.classifier
     
     def forward(self,x):
         x = self.encoder.module.backbone(x)
-        x = self.classifier(x)
         return x
         
     
@@ -82,4 +82,8 @@ def get_encoder():
 
 def get_classifier():
     model=LinearNet()
+    return model
+
+def get_model():
+    model=FinalModel()
     return model
