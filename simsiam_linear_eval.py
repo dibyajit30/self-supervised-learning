@@ -105,12 +105,13 @@ model.classifier=classifier
 #model=model.backbone
 #model.fc=classifier.classifier
 #model=model.to(device)
-optimizer = torch.optim.SGD(model.parameters(), lr=0.001,nesterov="True",momentum=0.9)
+optimizer = torch.optim.SGD(model.classifier.parameters(), lr=0.001,nesterov="True",momentum=0.9)
 #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[25,50,75], gamma=10)
 for epoch in range(100):
         #model.eval()
         #classifier.train()
-        model.train()
+        model.encoder.eval()
+        model.classifier.train()
         running_loss = 0.0
         for idx, (images, labels) in enumerate(trainloader):
             #with torch.no_grad():
